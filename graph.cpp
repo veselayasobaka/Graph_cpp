@@ -29,9 +29,9 @@ void Graph::set_levels()
 {
     auto it_stop = vortexes.end();
     int count = 0;
-    for (int j = 1; j < 3; ++j)
+    for (int j = 1; j < 2; ++j)
     {
-
+        int count = 0;
         for (auto it = vortexes.begin(); it != it_stop; ++it)
         {
             if (it->bounds.size()+it->level == 1)
