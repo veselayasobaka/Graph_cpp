@@ -27,10 +27,12 @@ Graph:: Graph(MatrixXf m1)
 
 void Graph::set_levels()
 {
-    for (int j = 1; j < 2; ++j)
+    auto it_stop = vortexes.end();
+    int count = 0;
+    for (int j = 1; j < 3; ++j)
     {
 
-        for (auto it = vortexes.begin(); it != vortexes.end(); ++it)
+        for (auto it = vortexes.begin(); it != it_stop; ++it)
         {
             if (it->bounds.size()+it->level == 1)
             {
@@ -38,9 +40,13 @@ void Graph::set_levels()
                 int bnd_vortex = it->bounds[0].number_vortex;
                 --vortexes[bnd_vortex].level;
                 vortexes[bnd_vortex].move_bound_to_end(it->number, it->bounds[0].weigth);
+                ++count;
             }
         }
-        sort(vortexes.begin(), vortexes.end(), sortlevels);
+        sort(vortexes.begin(), it_stop, sortlevels);
+        it_stop -= count;
+        cout<<"___________";
+        it_stop->show_vortex();
     }
 }
 

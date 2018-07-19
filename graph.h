@@ -3,6 +3,7 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include <algorithm>
 #include <eigen3/Eigen/Dense>
 using namespace std;
 using namespace Eigen;
@@ -48,11 +49,11 @@ struct Vortex
     {
         Bound temp(b, c);
         auto it = find(bounds.begin(), bounds.end(), temp);
-        (*it) = (*(bounds.end()-1));
-        (*(bounds.end()-1)) = temp;
+        if (it!=bounds.end())
+            {iter_swap(it, bounds.end()-1);}
     }
 };
-//function for sort the Graaph
+//function to sort the Graph
 bool sortlevels(Vortex v1, Vortex v2);
 bool waytosort(Vortex v1, Vortex v2);
 
