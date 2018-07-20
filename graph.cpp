@@ -12,8 +12,7 @@ Graph:: Graph(MatrixXf &m1)
             {
                 if (m1(i, j) != 0)
                 {
-                    Bound b1(j, m1(i, j));
-                    v.add_bound(b1);
+                    v.add_bound(j, m1(i, j));
                 }
             }
             vertexes.push_back(v);
@@ -31,20 +30,9 @@ void Graph::set_levels()
 
 }
 
-bool waytosort(Vertex &v1, Vertex &v2)
-{
-    return (v1.level < v2.level) ||
-           ((v1.level == v2.level) && (v1.bounds[0].weigth < v2.bounds[0].weigth)) ||
-           ((v1.level == v2.level) && (v1.bounds[0].weigth == v2.bounds[0].weigth) && (v1.colour < v2.colour)) ||
-           ((v1.level == v2.level) && (v1.bounds[0].weigth == v2.bounds[0].weigth) && (v1.colour == v2.colour) &&
-           (v1.child_range < v2.child_range)) ;
-}
 bool sortlevels(Vertex &v1, Vertex v2)
 {
     return (v1.level < v2.level);
 }
-bool operator ==(const Bound &lhs, const Bound &rhs)
-{
-    return (lhs.number_vertex==rhs.number_vertex)&&(lhs.weigth==rhs.weigth);
-}
+
 

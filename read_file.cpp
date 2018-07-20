@@ -25,8 +25,6 @@ Graph read_file(const string &s)
     while(getline(file, buff))
     {
         stringstream ss(buff);
-        if (buff.empty())
-            break;
         ss >> a >> b >> c;
         g1.set_bound(a, b, c);
     }

@@ -5,28 +5,10 @@
 #include <vector>
 #include <algorithm>
 #include <eigen3/Eigen/Dense>
-#include <queue>
+#include <map>
 using namespace std;
 using namespace Eigen;
 
-//Bound - keep two numbers - number of vertex, bounded with ours
-//and the weigth of this bound
-struct Bound
-{
-    int number_vertex;
-    int weigth;
-    Bound(int n, int w): number_vertex(n), weigth(w){}
-    operator string() const
-        {
-            return string("(") + to_string(number_vertex) + ", " + to_string(weigth) + ")";
-        }
-    ~Bound(){}
-    friend std::ostream &operator<<(std::ostream &os, const Bound& b)
-    {
-        return os << string(b);
-    }
-    friend bool operator ==(const Bound &lhs, const Bound &rhs);
-};
 //vertex - structure to keep all data about some vertex:
 //it's number, level, colour(mass), range of it's children and vector of bounds
 struct Vertex
@@ -35,20 +17,20 @@ struct Vertex
     int level = 0;
     int colour = 0;
     int child_range = 0;
-    vector<Bound> bounds;
+    map<int, int> bounds;
     Vertex(int n): number(n){}
     Vertex(int n, int colour): number(n), colour(colour){}
-    void add_bound(const Bound b)
+    void add_bound(int a, int b)
     {
-        bounds.push_back(b);
+        bounds.insert({a,b});
     }
     operator string() const
         {
             string a = ("") + to_string(number) + " " + to_string(level) + " "
                     + to_string(colour) + " " + to_string(child_range) + " ";
-            for(const auto& bound: bounds)
+            for(auto it = bounds.begin(); it != bounds.end(); ++it)
             {
-                a+=bound;
+                a += "(" + to_string(it->first) + ", " + to_string(it->second) + ")";
             }
             return a;
         }
@@ -56,15 +38,7 @@ struct Vertex
     {
         return os << string(b);
     }
-    void move_bound_to_end(const int &b, const int &c)
-    {
-        Bound temp(b, c);
-        auto it = find(bounds.begin(), bounds.end(), temp);
-        if (it!=bounds.end())
-            {
-            rotate(it, it+1, bounds.end());
-            }
-    }
+
 };
 //function to sort the Graph
 bool sortlevels(Vertex &v1, Vertex &v2);
@@ -92,9 +66,9 @@ public:
     }
     void show_graph() const
     {
-        for (auto it = vertexes.begin();  it != vertexes.end(); ++it)
+        for(const auto& vertex: vertexes)
         {
-            cout << *it;
+            cout << vertex;
             cout << endl;
         }
     }
@@ -104,41 +78,30 @@ public:
     }
     void set_colour()
     {
-        for (auto it = vertexes.begin();  it != vertexes.end(); ++it)
+        for(const auto& vertex: vertexes)
         {
-            cout << "Vertex " << it->number << ':';
+            cout << "Vertex " << vertex.number << ':';
             int a = 0;
             cin >> a;
-            vertexes[it->number].colour = a;
+            vertexes[vertex.number].colour = a;
         }
     }
-    void set_bound(int n)
-    {
-        cout << "Vertex " << n << ':';
-        int i = 0;
-        int j = 0;
-        cin >> i >> j;
-        Bound b(i, j);
-        vertexes[n].add_bound(b);
-    }
+
     void set_bound(int a, int b, int c)
     {
-        Bound b1(a, c);
-        Bound b2(b, c);
-        vertexes[a].add_bound(b2);
-        vertexes[b].add_bound(b1);
+        vertexes[a].add_bound(b, c);
+        vertexes[b].add_bound(a, c);
     }
 
     void set_bound()
     {
-        for (auto it = vertexes.begin();  it != vertexes.end(); ++it)
+        for(const auto& vertex: vertexes)
         {
-            cout << "Vertex " << it->number << ':';
+            cout << "Vertex " << vertex.number << ':';
             int i = 0;
             int j = 0;
             cin >> i >> j;
-            Bound b(i, j);
-            vertexes[it->number].add_bound(b);
+            vertexes[vertex.number].add_bound(i, j);
         }
     }
     void set_levels();
