@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <eigen3/Eigen/Dense>
 #include <map>
+#include <queue>
 using namespace std;
 using namespace Eigen;
 
@@ -52,7 +53,7 @@ bool waytosort(Vertex &v1, Vertex &v2);
 class Graph
 {
 private:
-    vector<Vertex> vertexes;
+    map<int, Vertex> vertexes;
 public:
     Graph(){}
     Graph(MatrixXf &m1);
@@ -61,68 +62,39 @@ public:
         for (int i = 0; i < q; ++i)
         {
             Vertex v(i);
-            vertexes.push_back(v);
+            vertexes.insert({i, v});
         }
     }
-    void show_graph() const
-    {
-        for(const auto& vertex: vertexes)
-        {
-            cout << vertex;
-            cout << endl;
-        }
-    }
-    void set_colour(int n, int c)
-    {
-        vertexes[n].colour = c;
-    }
-    void set_colour()
-    {
-        for(const auto& vertex: vertexes)
-        {
-            cout << "Vertex " << vertex.number << ':';
-            int a = 0;
-            cin >> a;
-            vertexes[vertex.number].colour = a;
-        }
-    }
-
     void set_bound(int a, int b, int c)
     {
-        vertexes[a].add_bound(b, c);
-        vertexes[b].add_bound(a, c);
+        auto it = vertexes.find(a);
+        it->second.add_bound(b, c);
+        it = vertexes.find(b);
+        it->second.add_bound(a, c);
+
     }
 
-    void set_bound()
-    {
-        for(const auto& vertex: vertexes)
-        {
-            cout << "Vertex " << vertex.number << ':';
-            int i = 0;
-            int j = 0;
-            cin >> i >> j;
-            vertexes[vertex.number].add_bound(i, j);
-        }
-    }
     void set_levels();
     operator string() const
         {
             string a;
-            for(const auto& vertex: vertexes)
+            for(auto it = vertexes.begin(); it != vertexes.end(); ++it)
             {
-                a+=vertex;
+
+                a+=it->second;
                 a+="\n";
             }
             return a;
         }
-        friend std::ostream &operator<<(std::ostream &os, const Graph& b)
+    friend std::ostream &operator<<(std::ostream &os, const Graph& b)
         {
             return os << string(b);
         }
     void add_vertex(int a, int b)
-    {
-        vertexes.push_back(Vertex(a, b));
-    }
+        {
+            Vertex v(a, b);
+            vertexes.insert({a, v});
+        }
 
 };
 
