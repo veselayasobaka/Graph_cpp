@@ -70,13 +70,27 @@ void Graph::set_levels()
     else
         cout << "SOMTHING GO WRONG!!!!! MORE THAN TWO ROOTS!!" << endl;
     j = 0;
-    sort(v_sorted.begin(), v_sorted.end(), waytosort);
-    for (auto &vertex: v_sorted)
+    int b = 0;
+    int max_level = v_sorted.rbegin()->level;
+    auto iter2 = v_sorted.begin();
+    for (int i = 1; i < max_level + 2; ++i)
     {
-
+        sort(iter2, v_sorted.end(), waytosort);
+        for( ; (iter2->level!=i) && (iter2!=v_sorted.end()); ++iter2)
+        {
+            iter2->level = j;
+            b = iter2->bounds.begin()->first;
+            auto iter_find = find(iter2, v_sorted.end(), Vertex(b));
+            if(iter_find == v_sorted.end())
+                break;
+            iter_find->child_range+=to_string(j);
+            ++j;
+        }
+    }
+    for (auto const &vertex: v_sorted)
+    {
         cout << vertex << endl;
     }
-
 
 }
 

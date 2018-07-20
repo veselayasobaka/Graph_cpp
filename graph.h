@@ -17,7 +17,7 @@ struct Vertex
     int number = 0;
     int level = 0;
     int colour = 0;
-    int child_range = 0;
+    string child_range = " ";
     map<int, int> bounds;
     Vertex(int n): number(n){}
     Vertex(int n, int colour): number(n), colour(colour){}
@@ -28,19 +28,23 @@ struct Vertex
     operator string() const
         {
             string a = ("") + to_string(number) + " " + to_string(level) + " "
-                    + to_string(colour) + " " + to_string(child_range) + " ";
+                    + to_string(colour) + " " + child_range + " ";
             for(auto it = bounds.begin(); it != bounds.end(); ++it)
             {
                 a += "(" + to_string(it->first) + ", " + to_string(it->second) + ")";
             }
             return a;
         }
-    friend std::ostream &operator<<(std::ostream &os, const Vertex& b)
+    friend ostream &operator<<(ostream &os, const Vertex& b)
     {
         return os << string(b);
     }
-
+    friend bool operator==(const Vertex &vl, const Vertex &vr)
+    {
+        return vl.number == vr.number;
+    }
 };
+
 //function to sort the Graph
 bool sortlevels(Vertex &v1, Vertex &v2);
 bool waytosort(Vertex &v1, Vertex &v2);
@@ -86,7 +90,7 @@ public:
             }
             return a;
         }
-    friend std::ostream &operator<<(std::ostream &os, const Graph& b)
+    friend ostream &operator<<(ostream &os, const Graph& b)
         {
             return os << string(b);
         }
