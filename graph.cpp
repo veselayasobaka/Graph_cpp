@@ -1,7 +1,24 @@
 #include "graph.h"
 //This constructor transormate squared adjacency matrix of graph
 //with no more than one cycle into the adjacency list
-Graph:: Graph(MatrixXf &m1)
+
+bool is_equal(const Vertex &v1, const Vertex &v2)
+{
+    return (v1.level == v2.level)&&(v1.colour==v2.colour)&&(v1.child_range == v2.child_range)&&
+            (v1.bounds.begin()->second == v2.bounds.begin()->second);
+}
+string code_to_string(vector<Vertex> &v)
+{
+    string canon_code;
+    for (auto const &vertex: v)
+    {
+        canon_code+=to_string(vertex.level)+to_string(vertex.colour)+vertex.child_range
+                +to_string(vertex.bounds.begin()->second);
+    }
+    return canon_code;
+}
+
+Graph:: Graph(const Ref<const MatrixXf> &m1)
 {
     if (m1 == m1.transpose() && (m1.rows())*2 >= m1.count())
     {
@@ -25,7 +42,7 @@ Graph:: Graph(MatrixXf &m1)
     }
 }
 //DON'T TRY TO UNDERSTEND IT, YOU MIND WILL CRUSH
-void Graph::set_levels()
+string Graph::get_canon_code()
 {
     queue<int> v_list;                      //queue for numbers of lower branches
     int a = 0;
@@ -69,28 +86,37 @@ void Graph::set_levels()
     }
     else
         cout << "SOMTHING GO WRONG!!!!! MORE THAN TWO ROOTS!!" << endl;
-    j = 0;
-    int b = 0;
-    int max_level = v_sorted.rbegin()->level;
-    auto iter2 = v_sorted.begin();
-    for (int i = 1; i < max_level + 2; ++i)
+    j = 0;           //this number will keep range of vertex
+    int b = 0;       //this number will keep number of connected vertex from higher level
+    int max_level = v_sorted.rbegin()->level;     //how many cycles we need to end canoniztion procedure
+    auto iter2 = v_sorted.begin();               //iter2 will point at start of sort procedure inner "for"
+    for (int i = 1; i < max_level + 2; ++i)      //in order to lower number of sorting vertexes
     {
-        sort(iter2, v_sorted.end(), waytosort);
-        for( ; (iter2->level!=i) && (iter2!=v_sorted.end()); ++iter2)
-        {
-            iter2->level = j;
-            b = iter2->bounds.begin()->first;
-            auto iter_find = find(iter2, v_sorted.end(), Vertex(b));
-            if(iter_find == v_sorted.end())
+        sort(iter2, v_sorted.end(), waytosort);   //sorting part of v_sorted in which we didn't
+        for( ; (iter2->level!=i) && (iter2!=v_sorted.end()); ++iter2)  //first we looking at previos 0-levels, then
+        {                                                             //at 1-s and so on until the end
+            if (is_equal((*iter2), *(iter2+1)))
+            {
+                iter2->level = j;            //if our vertex equal to next number of next vertex will be the same
+            }
+            else
+            {
+                iter2->level = j;       //in other case j++
+                ++j;
+            }
+            b = iter2->bounds.begin()->first;                        //found connected vertex from
+            auto iter_find = find(iter2, v_sorted.end(), Vertex(b)); //next level of tree
+            if(iter_find == v_sorted.end())                          //if we cannot find it break the cycle
                 break;
-            iter_find->child_range+=to_string(j);
-            ++j;
+            iter_find->child_range+=to_string(j)+" ";                    //in opposite case write our range to it's child_range
         }
     }
     for (auto const &vertex: v_sorted)
     {
         cout << vertex << endl;
     }
+    return code_to_string(v_sorted);
+
 
 }
 

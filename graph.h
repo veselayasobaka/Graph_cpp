@@ -28,7 +28,7 @@ struct Vertex
     operator string() const
         {
             string a = ("") + to_string(number) + " " + to_string(level) + " "
-                    + to_string(colour) + " " + child_range + " ";
+                    + to_string(colour) + " " + child_range + "           ";
             for(auto it = bounds.begin(); it != bounds.end(); ++it)
             {
                 a += "(" + to_string(it->first) + ", " + to_string(it->second) + ")";
@@ -60,7 +60,7 @@ private:
     map<int, Vertex> vertexes;
 public:
     Graph(){}
-    Graph(MatrixXf &m1);
+    Graph(const Ref<const MatrixXf>& m1);
     Graph(int q)
     {
         for (int i = 0; i < q; ++i)
@@ -78,7 +78,7 @@ public:
 
     }
 
-    void set_levels();
+    string get_canon_code();
     operator string() const
         {
             string a;
