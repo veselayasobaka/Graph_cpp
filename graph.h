@@ -17,7 +17,7 @@ struct Vertex
     int number = 0;
     int level = 0;
     int colour = 0;
-    string child_range = " ";
+    string child_range = "";
     map<int, int> bounds;
     Vertex(int n): number(n){}
     Vertex(int n, int colour): number(n), colour(colour){}
@@ -99,6 +99,10 @@ public:
             Vertex v(a, b);
             vertexes.insert({a, v});
         }
+    bool is_cycle();
+
+    void find_cycle();
+
 
 };
 
