@@ -4,6 +4,14 @@
 #include "graph.h"
 using namespace std;
 using namespace Eigen;
+
+//function to read from file
+// matrix should be in format like this:
+//0 2
+//1 3
+//#
+//0 1 12
+// 0, 1 - numbers of nodes, 2,3 - their mass factor (colour in my terminology), 12 - weigth of bound between them
 Graph read_file(const string &s)
 {
     ifstream file(s);
@@ -30,6 +38,7 @@ Graph read_file(const string &s)
     }
     return g1;
 }
+// for tests - give it matrix of adjacency, it'll write it to file
 void matrix_to_file(const Ref<const MatrixXf>& m1)
 {
     cout << "Write matrix to filename>";

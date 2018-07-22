@@ -45,7 +45,7 @@ struct Vertex
     }
 };
 
-//function to sort the Graph
+//prototypes of functions to sort the Graph
 bool sortlevels(Vertex &v1, Vertex &v2);
 bool waytosort(Vertex &v1, Vertex &v2);
 
@@ -57,7 +57,7 @@ bool waytosort(Vertex &v1, Vertex &v2);
 class Graph
 {
 private:
-    map<int, Vertex> vertexes;
+    map<int, Vertex> vertexes;     //graph keeps data in map - for fast acces by key
 public:
     Graph(){}
     Graph(const Ref<const MatrixXf>& m1);
@@ -69,7 +69,7 @@ public:
             vertexes.insert({i, v});
         }
     }
-    void set_bound(int a, int b, int c)
+    void set_bound(int a, int b, int c)      // you don't need to use this
     {
         auto it = vertexes.find(a);
         it->second.add_bound(b, c);
@@ -78,7 +78,7 @@ public:
 
     }
 
-    string get_canon_code();
+    string get_canon_code();        // it's our heart
     operator string() const
         {
             string a;

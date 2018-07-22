@@ -1,16 +1,19 @@
 #include "graph.h"
-//This constructor transormate squared adjacency matrix of graph
-//with no more than one cycle into the adjacency list
-string get_code(vector<Vertex> v);
+
+string get_code(vector<Vertex> v);     // prototypes
+
 string get_code(vector<Vertex> v, vector<Vertex> v_cycle);
+
 string get_cycle_code(vector<Vertex> &v,vector<Vertex>::iterator iter);
-bool is_equal(const Vertex &v1, const Vertex &v2)
+
+bool is_equal(const Vertex &v1, const Vertex &v2)           // function to test equivalence of Vertexes
 {
     return (v1.level == v2.level)&&(v1.colour==v2.colour)&&(v1.child_range == v2.child_range)&&
             (v1.bounds.begin()->second == v2.bounds.begin()->second);
 }
-string code_to_string(vector<Vertex> &v)
-{
+
+string code_to_string(vector<Vertex> &v)                             // Generates code of graph
+{                                                                    //if graph is connonized - it is canonical code
     string canon_code;
     for (auto const &vertex: v)
     {
@@ -19,6 +22,9 @@ string code_to_string(vector<Vertex> &v)
     }
     return canon_code;
 }
+
+//This constructor transforms squared adjacency matrix of graph
+//with no more than one cycle into the adjacency list
 
 Graph:: Graph(const Ref<const MatrixXf> &m1)
 {
@@ -43,6 +49,8 @@ Graph:: Graph(const Ref<const MatrixXf> &m1)
         cout << "Wrong Matrix!" << endl;
     }
 }
+// function that takes graph, distributes it vertexes by levels and gives you
+//canonical graph code with a little help of get_code function
 // DON'T TRY TO UNDERSTEND IT, YOU MIND WILL CRUSH
 string Graph::get_canon_code()
 {
@@ -106,11 +114,11 @@ string Graph::get_canon_code()
         return get_code(v_sorted);
 }
 
-bool sortlevels(Vertex &v1, Vertex v2)
+bool sortlevels(Vertex &v1, Vertex v2)    // sorts ONLY by levels.
 {
     return (v1.level < v2.level);
 }
-bool waytosort(Vertex &v1, Vertex &v2)
+bool waytosort(Vertex &v1, Vertex &v2)    // sorts by all meaning parametres
 {
     return (v1.level < v2.level) ||
            ((v1.level == v2.level) && (v1.bounds.begin()->second < v2.bounds.begin()->second)) ||
@@ -118,7 +126,7 @@ bool waytosort(Vertex &v1, Vertex &v2)
            ((v1.level == v2.level) && (v1.bounds.begin()->second == v2.bounds.begin()->second) && (v1.colour == v2.colour) &&
            (v1.child_range < v2.child_range)) ;
 }
-bool Graph::is_cycle()
+bool Graph::is_cycle()          // can test is graph cycle or not
 {
     int number_bounds = 0;
     int number_nodes = (vertexes.rbegin()->second.number) + 1;
@@ -236,16 +244,14 @@ string get_code(vector<Vertex> v, vector<Vertex> v_cycle)
     }
     else                           // and if we have number of vertexes with same level, colour, etc?
     {
-        for (auto iter = v_cycle.begin(); iter != v_cycle.end(); ++iter)
-            cout << get_cycle_code(v_cycle, iter) << endl;
-
+        code_of_cycle = get_cycle_code(v_cycle, v_cycle.begin());
+        int level_of_first = v_cycle.begin()->level;
+        for (auto iter = v_cycle.begin() + 1; iter->level == level_of_first; ++iter)
+        {
+            code_of_cycle = min(code_of_cycle, get_cycle_code(v_cycle, iter));
+        }
     }
-    for (auto const &vert:v_cycle)
-    {
-        cout << vert << endl;
-    }
-    cout << code_of_cycle + "C" + code_to_string(v) << endl;
-    return code_of_cycle + "C" + code_to_string(v);
+    return code_to_string(v) + "C" + code_of_cycle;
 }
 
 
