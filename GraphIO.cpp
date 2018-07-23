@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <eigen3/Eigen/Dense>
 #include "graph.h"
 using namespace std;
 using namespace Eigen;
@@ -11,8 +12,8 @@ using namespace Eigen;
 //1 3
 //#
 //0 1 12
-// 0, 1 - numbers of nodes, 2,3 - their mass factor (colour in my terminology), 12 - weigth of bound between them
-Graph read_file(const string &s)
+// 0, 1 - numbers of nodes, 2,3 - their mass factor (colour in my terminology), 12 - weigth of edge between them
+Graph readFile(const string &s)
 {
     ifstream file(s);
     string buff, numb;
@@ -27,19 +28,19 @@ Graph read_file(const string &s)
             break;
         stringstream ss(buff);
         ss >> a >> b;
-        g1.add_vertex(a, b);
+        g1.addNode(a, b);
 
     }
     while(getline(file, buff))
     {
         stringstream ss(buff);
         ss >> a >> b >> c;
-        g1.set_bound(a, b, c);
+        g1.setEdge(a, b, c);
     }
     return g1;
 }
 // for tests - give it matrix of adjacency, it'll write it to file
-void matrix_to_file(const Ref<const MatrixXf>& m1)
+void writeMatrixToFile(const Ref<const MatrixXi>& m1)
 {
     cout << "Write matrix to filename>";
     string s;

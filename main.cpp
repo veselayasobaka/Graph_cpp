@@ -1,11 +1,13 @@
 #include "graph.h"
+#include "GraphIO.cpp"
 using namespace std;
 using namespace Eigen;
-void matrix_to_file(const Ref<const MatrixXf>& m);
-Graph read_file(const string &s);
+void writeMatrixToFile(const Ref<const MatrixXi>& m);
+Graph readFile(const string &s);
+
 int main(int argc, char* argv[])
 {
-    MatrixXf m1(18, 18);
+    MatrixXi m1(18, 18);
     m1 <<   0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
             1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
             1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -27,9 +29,8 @@ int main(int argc, char* argv[])
 
 
 
-    matrix_to_file(m1);
     Graph g1(m1);
-    string a = g1.get_canon_code();
+    string a = g1.getCanonCode();
     cout << a << endl;
     return 0;
 }

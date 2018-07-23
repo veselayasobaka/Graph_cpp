@@ -1,47 +1,67 @@
 #include "graph.h"
 
-string get_code(vector<Vertex> v);     // prototypes
+string getCode(vector<Node> v);     // prototypes
+string getCode(vector<Node> v, vector<Node> v_cycle);
+string getCycleCode(vector<Node> &v,vector<Node>::iterator iter);
 
-string get_code(vector<Vertex> v, vector<Vertex> v_cycle);
-
-string get_cycle_code(vector<Vertex> &v,vector<Vertex>::iterator iter);
-
-bool is_equal(const Vertex &v1, const Vertex &v2)           // function to test equivalence of Vertexes
+// metods connected with nodes
+void Node::addEdge(int a, int b)
+{
+    edges.insert({a,b});
+}
+Node::operator string() const
+    {
+        string a = ("") + to_string(number) + " " + to_string(level) + " "
+                + to_string(colour) + " " + child_range + "           ";
+        for(auto it = edges.begin(); it != edges.end(); ++it)
+        {
+            a += "(" + to_string(it->first) + ", " + to_string(it->second) + ")";
+        }
+        return a;
+    }
+ostream& operator<<(ostream &os, const Node& b)
+{
+    return os << string(b);
+}
+bool operator==(const Node &vl, const Node &vr)
+{
+    return vl.number == vr.number;
+}
+bool isEqual(const Node &v1, const Node &v2)           // function to test equivalence of _nodes
 {
     return (v1.level == v2.level)&&(v1.colour==v2.colour)&&(v1.child_range == v2.child_range)&&
-            (v1.bounds.begin()->second == v2.bounds.begin()->second);
+            (v1.edges.begin()->second == v2.edges.begin()->second);
 }
-
-string code_to_string(vector<Vertex> &v)                             // Generates code of graph
-{                                                                    //if graph is connonized - it is canonical code
+string codeTostring(vector<Node> &v)                             // Generates code of tree
+{                                                                    //if tree is connonized - it is canonical code
     string canon_code;
-    for (auto const &vertex: v)
+    for (auto const &node: v)
     {
-        canon_code+=to_string(vertex.level)+to_string(vertex.colour)+vertex.child_range
-                +to_string(vertex.bounds.begin()->second);
+        canon_code+=to_string(node.level)+to_string(node.colour)+node.child_range
+                +to_string(node.edges.begin()->second);
     }
     return canon_code;
 }
 
+//metods connected with Graphs
 //This constructor transforms squared adjacency matrix of graph
 //with no more than one cycle into the adjacency list
-
-Graph:: Graph(const Ref<const MatrixXf> &m1)
+Graph:: Graph(const Ref<const MatrixXi> &m1)
 {
     if (m1 == m1.transpose() && (m1.rows())*2 >= m1.count())
     {
         for (int i = 0; i < m1.rows(); ++i)
         {
-            Vertex v(i);
+            Node v(i);
             for (int j = 0; j < m1.rows(); ++j)
             {
                 if (m1(i, j) != 0)
                 {
-                    v.add_bound(j, m1(i, j));
+                    v.addEdge(j, m1(i, j));
                 }
             }
 
-            vertexes.insert({i,v});
+            _nodes.insert({i,v});
         }
     }
     else
@@ -49,21 +69,75 @@ Graph:: Graph(const Ref<const MatrixXf> &m1)
         cout << "Wrong Matrix!" << endl;
     }
 }
-// function that takes graph, distributes it vertexes by levels and gives you
-//canonical graph code with a little help of get_code function
+Graph::Graph(int q)
+{
+    for (int i = 0; i < q; ++i)
+    {
+        Node v(i);
+        _nodes.insert({i, v});
+    }
+}
+
+void Graph::setEdge(int a, int b, int c)      //set edge between a and b nodes with weight c
+{
+    auto it = _nodes.find(a);
+    it->second.addEdge(b, c);
+    it = _nodes.find(b);
+    it->second.addEdge(a, c);
+}
+void Graph::addNode(int a, int b)
+    {
+        Node v(a, b);
+        _nodes.insert({a, v});
+    }
+Graph::operator string() const
+{
+    string a;
+    for(auto it = _nodes.begin(); it != _nodes.end(); ++it)
+    {
+
+        a+=it->second;
+        a+="\n";
+    }
+    return a;
+}
+ostream& operator<<(ostream &os, const Graph& b)
+    {
+        return os << string(b);
+    }
+bool waytosort(Node &v1, Node &v2)    // sorts by all meaning parametres
+{
+    return (v1.level < v2.level) ||
+           ((v1.level == v2.level) && (v1.edges.begin()->second < v2.edges.begin()->second)) ||
+           ((v1.level == v2.level) && (v1.edges.begin()->second == v2.edges.begin()->second) && (v1.colour < v2.colour)) ||
+           ((v1.level == v2.level) && (v1.edges.begin()->second == v2.edges.begin()->second) && (v1.colour == v2.colour) &&
+           (v1.child_range < v2.child_range)) ;
+}
+bool Graph::isCycle()          // can test is graph cycle or not
+{
+    int number_edges = 0;
+    int number_nodes = (_nodes.rbegin()->second.number) + 1;
+    for (auto const &node: _nodes)
+    {
+        number_edges += node.second.edges.size();
+    }
+    return number_edges/2!=number_nodes-1;
+}
+// function that takes graph, distributes it _nodes by levels and gives you
+//canonical graph code with a little help of getCode function
 // DON'T TRY TO UNDERSTEND IT, YOU MIND WILL CRUSH
-string Graph::get_canon_code()
+string Graph::getCanonCode()
 {
     queue<int> v_list;                      // queue for numbers of lower branches
     int a = 0;
-    vector<Vertex> v_sorted;                // vector for sorted by level vertexes
+    vector<Node> v_sorted;                // vector for sorted by level _nodes
     int j = 0;
     uint size = 0;              //  to leave the circle in case of cycle
-    while(vertexes.size()>2)    // if graph hasn't the cycle we leave it when it only has root(s)
+    while(_nodes.size()>2)    // if graph hasn't the cycle we leave it when it only has root(s)
     {
-        for(auto it = vertexes.begin(); it != vertexes.end(); ++it)
+        for(auto it = _nodes.begin(); it != _nodes.end(); ++it)
         {
-            if (it->second.bounds.size() == 1)  // if our vertex have only 1 bound - it's lower branch
+            if (it->second.edges.size() == 1)  // if our node have only 1 edge - it's lower branch
             {
                 it->second.level = j;                                // let's write it's level
                 v_sorted.push_back(it->second);                      //and take it to better place
@@ -73,141 +147,114 @@ string Graph::get_canon_code()
         while(v_list.size())
         {
             a = v_list.front();
-            int bnd_vertex = vertexes.find(a)->second.bounds.begin()->first; // number of vertex, with witch we were connected
-            auto iter = vertexes.find(bnd_vertex);               // find bounded vertex
-            iter->second.bounds.erase(vertexes.find(a)->first); // erase connection with our vertex. now it have only
-            vertexes.erase(a);                                   //connection - with upper branch
+            int bnd_node = _nodes.find(a)->second.edges.begin()->first; // number of node, with witch we were connected
+            auto iter = _nodes.find(bnd_node);               // find edgeed node
+            iter->second.edges.erase(_nodes.find(a)->first); // erase connection with our node. now it have only
+            _nodes.erase(a);                                   //connection - with upper branch
             v_list.pop();
         }
         ++j;
-        if(size == vertexes.size())    // if graph has a cycle we leave it when
+        if(size == _nodes.size())    // if graph has a cycle we leave it when
             break;                     //graph has only cycle so size stop changes
-        size = vertexes.size();
+        size = _nodes.size();
     }
 
 
-    if (vertexes.size()==2)
+    if (_nodes.size()==2)
     {
-        vertexes.begin()->second.level = j;
-        vertexes.rbegin()->second.level = j;
-        v_sorted.push_back(vertexes.begin()->second);
-        v_sorted.push_back(vertexes.rbegin()->second);
-        vertexes.clear();
+        _nodes.begin()->second.level = j;
+        _nodes.rbegin()->second.level = j;
+        v_sorted.push_back(_nodes.begin()->second);
+        v_sorted.push_back(_nodes.rbegin()->second);
+        _nodes.clear();
     }
-    else if (vertexes.size()==1)
+    else if (_nodes.size()==1)
     {
-        vertexes.begin()->second.level = j;
-        v_sorted.push_back(vertexes.begin()->second);
-        vertexes.clear();
+        _nodes.begin()->second.level = j;
+        v_sorted.push_back(_nodes.begin()->second);
+        _nodes.clear();
     }
     else
     {
-        vector<Vertex> v_cycle;
-        for (auto &vertex: vertexes)
+        vector<Node> v_cycle;
+        for (auto &node: _nodes)
         {
-            vertex.second.level = (*v_sorted.rbegin()).level+1;
-            v_cycle.push_back(vertex.second);
+            node.second.level = (*v_sorted.rbegin()).level+1;
+            v_cycle.push_back(node.second);
         }
-        vertexes.clear();
-        return get_code(v_sorted, v_cycle);
+        _nodes.clear();
+        return getCode(v_sorted, v_cycle);
     }
-        return get_code(v_sorted);
+        return getCode(v_sorted);
 }
 
-bool sortlevels(Vertex &v1, Vertex v2)    // sorts ONLY by levels.
+string getCode(vector<Node> v)      // compute code for non-cycled graph (tree)
 {
-    return (v1.level < v2.level);
-}
-bool waytosort(Vertex &v1, Vertex &v2)    // sorts by all meaning parametres
-{
-    return (v1.level < v2.level) ||
-           ((v1.level == v2.level) && (v1.bounds.begin()->second < v2.bounds.begin()->second)) ||
-           ((v1.level == v2.level) && (v1.bounds.begin()->second == v2.bounds.begin()->second) && (v1.colour < v2.colour)) ||
-           ((v1.level == v2.level) && (v1.bounds.begin()->second == v2.bounds.begin()->second) && (v1.colour == v2.colour) &&
-           (v1.child_range < v2.child_range)) ;
-}
-bool Graph::is_cycle()          // can test is graph cycle or not
-{
-    int number_bounds = 0;
-    int number_nodes = (vertexes.rbegin()->second.number) + 1;
-    for (auto const &vertex: vertexes)
-    {
-        number_bounds += vertex.second.bounds.size();
-    }
-    return number_bounds/2!=number_nodes-1;
-}
-
-string get_code(vector<Vertex> v)      // compute code for non-cycled graph (tree)
-{
-    int j = 0;       // this number will keep range of vertex
-    int b = 0;       // this number will keep number of connected vertex from higher level
+    int j = 0;       // this number will keep range of node
+    int b = 0;       // this number will keep number of connected node from higher level
     int max_level = v.rbegin()->level;     // how many cycles we need to end canoniztion procedure
     auto iter2 = v.begin();               // iter2 will point at start of sort procedure of inner "for"
-    for (int i = 1; i < max_level + 2; ++i)      // in order to lower number of sorting vertexes
+    for (int i = 1; i < max_level + 2; ++i)      // in order to lower number of sorting _nodes
     {
         sort(iter2, v.end(), waytosort);   // sorting part of v_sorted in which we wasn't
         for( ; (iter2->level!=i) && (iter2!=v.end()); ++iter2)  // at first time we looking at 0-levels, then
         {                                                             //at 1-s and so on until the end
-            if (is_equal((*iter2), *(iter2+1)))
+            if (isEqual((*iter2), *(iter2+1)))
             {
-                iter2->level = j;            // if our vertex equal to next, number of the next vertex will be the same
+                iter2->level = j;            // if our node equal to next, number of the next node will be the same
             }
             else
             {
                 iter2->level = j;       // in other case j++
                 ++j;
             }
-            b = iter2->bounds.begin()->first;                        // found connected vertex from
-            auto iter_find = find(iter2, v.end(), Vertex(b));        //the next level of tree
+            b = iter2->edges.begin()->first;                        // found connected node from
+            auto iter_find = find(iter2, v.end(), Node(b));        //the next level of tree
             if(iter_find == v.end())                          // if we cannot find it break the cycle
                 break;
             iter_find->child_range+=to_string(iter2->level)+"_";                    // in opposite case write our range to it's child_range
         }
 
     }
-    /*for (auto &vertex: v)
-    {
-        cout << vertex << endl;
-    }*/
 
-    return code_to_string(v);
+    return codeTostring(v);
 }
 
 //--------->simillar function but made to work with 1-cycled trees!<------------//
 
-string get_code(vector<Vertex> v, vector<Vertex> v_cycle)
+string getCode(vector<Node> v, vector<Node> v_cycle)
 {
-    Vertex temp(0);
-    for (auto const &vertex: v_cycle)     //
+    Node temp(0);
+    for (auto const &node: v_cycle)     //
     {
-        temp = vertex;
-        temp.bounds.clear();
+        temp = node;
+        temp.edges.clear();
         v.push_back(temp);
     }
 
     string code_of_cycle = "";       // for part of canonization code from cycle;
 
 
-    int j = 0;       // this number will keep range of vertex
-    int b = 0;       // this number will keep number of connected vertex from higher level
+    int j = 0;       // this number will keep range of node
+    int b = 0;       // this number will keep number of connected node from higher level
     int max_level = v_cycle.rbegin()->level;     // how many cycles we need to end canoniztion procedure for tree
     auto iter2 = v.begin();               // iter2 will point at start of sort procedure of inner "for"
-    for (int i = 1; i < max_level + 2; ++i)      // in order to lower number of sorting vertexes
+    for (int i = 1; i < max_level + 2; ++i)      // in order to lower number of sorting _nodes
     {
         sort(iter2, v.end(), waytosort);   // sorting part of v_sorted in which we were not
-        for( ; iter2->bounds.size() != 0; ++iter2)  // at first time we looking at 0-levels, then
-        {                                                             //at 1-s and so on until the start of cycle vertexes
-            if (is_equal((*iter2), *(iter2+1)))
+        for( ; iter2->edges.size() != 0; ++iter2)  // at first time we looking at 0-levels, then
+        {                                                             //at 1-s and so on until the start of cycle _nodes
+            if (isEqual((*iter2), *(iter2+1)))
             {
-                iter2->level = j;            // if our vertex equal to next, number of the next vertex will be the same
+                iter2->level = j;            // if our node equal to next, number of the next node will be the same
             }
             else
             {
                 iter2->level = j;       // in other case j++
                 ++j;
             }
-            b = iter2->bounds.begin()->first;                        // found connected vertex from
-            auto iter_find = find(iter2, v.end(), Vertex(b));        //the next level of tree
+            b = iter2->edges.begin()->first;                        // found connected node from
+            auto iter_find = find(iter2, v.end(), Node(b));        //the next level of tree
             if(iter_find == v.end())                          // if we cannot find it break the cycle
                 break;
             iter_find->child_range+=to_string(iter2->level)+"_";      // in opposite case write our range to it's child_range
@@ -215,9 +262,9 @@ string get_code(vector<Vertex> v, vector<Vertex> v_cycle)
     }
 
 
-    for (auto it = v.rbegin(); it->bounds.size()==0; ++it)     // transporting child_ranges back to v_cycle
+    for (auto it = v.rbegin(); it->edges.size()==0; ++it)     // transporting child_ranges back to v_cycle
     {
-        auto iter_find = find(v_cycle.begin(), v_cycle.end(), Vertex(it->number));
+        auto iter_find = find(v_cycle.begin(), v_cycle.end(), Node(it->number));
         iter_find->child_range += it->child_range;
         v.erase(v.end()-1);                          // erase last element. we don't need it anymore
     }
@@ -226,7 +273,7 @@ string get_code(vector<Vertex> v, vector<Vertex> v_cycle)
     j = max_level;                                  // numerate from the first level in cycle
     for (auto iter = v_cycle.begin(); iter != v_cycle.end(); ++iter)
     {
-        if (is_equal((*iter), *(iter+1)))
+        if (isEqual((*iter), *(iter+1)))
         {
             iter->level = j;
         }
@@ -238,72 +285,72 @@ string get_code(vector<Vertex> v, vector<Vertex> v_cycle)
 
     }
 
-    if (v_cycle.begin()->level != (v_cycle.begin() + 1)->level)    // simple(haha) case when we have one vertex in cycle
+    if (v_cycle.begin()->level != (v_cycle.begin() + 1)->level)    // simple(haha) case when we have one node in cycle
     {
-        code_of_cycle = get_cycle_code(v_cycle, v_cycle.begin());
+        code_of_cycle = getCycleCode(v_cycle, v_cycle.begin());
     }
-    else                           // and if we have number of vertexes with same level, colour, etc?
+    else                           // and if we have number of _nodes with same level, colour, etc?
     {
-        code_of_cycle = get_cycle_code(v_cycle, v_cycle.begin());
+        code_of_cycle = getCycleCode(v_cycle, v_cycle.begin());
         int level_of_first = v_cycle.begin()->level;
         for (auto iter = v_cycle.begin() + 1; iter->level == level_of_first; ++iter)
         {
-            code_of_cycle = min(code_of_cycle, get_cycle_code(v_cycle, iter));
+            code_of_cycle = min(code_of_cycle, getCycleCode(v_cycle, iter));
         }
     }
-    return code_to_string(v) + "C" + code_of_cycle;
+    return codeTostring(v) + "C" + code_of_cycle;
 }
 
 
-    //CANONIZATION CYCLE PROCEDURE(from pointed vertex)! WARNING, HARD TO UNDERSTAND
-string get_cycle_code(vector<Vertex> &v_cycle,vector<Vertex>::iterator iter_in)
+    //CANONIZATION CYCLE PROCEDURE(from pointed node)! WARNING, HARD TO UNDERSTAND
+string getCycleCode(vector<Node> &v_cycle,vector<Node>::iterator iter_in)
 {
     string cycle_left = "";                // strings for cononization code of cycle if going left
     string cycle_right = "";               //and right
-    int bnd_vertex = 0;                    // number for keeping number of bounded vertex with lower number than others
-    int previous_vertex = -1;              // number for keeping number of previous vertex (don't want to go back-forwards)
+    int bnd_node = 0;                    // number for keeping number of edgeed node with lower number than others
+    int previous_node = -1;              // number for keeping number of previous node (don't want to go back-forwards)
     auto iter = iter_in;
 
     for (uint k = 0; k < v_cycle.size(); ++k)                  // code for moving to the left
     {
         cycle_right+=to_string(iter->level)+to_string(iter->colour)+iter->child_range
-                +to_string(iter->bounds.begin()->second);      // writing all meaning numbers in string
-        if (iter->bounds.begin()->first!=previous_vertex)     // testing number of previous vortex
+                +to_string(iter->edges.begin()->second);      // writing all meaning numbers in string
+        if (iter->edges.begin()->first!=previous_node)     // testing number of previous vortex
         {
-            bnd_vertex = iter->bounds.begin()->first;         // where we going to
-            previous_vertex = iter->number;                   // remember the number for next cycle
-            iter = find(v_cycle.begin(), v_cycle.end(), Vertex(bnd_vertex));       // finding vertex where we going to
+            bnd_node = iter->edges.begin()->first;         // where we going to
+            previous_node = iter->number;                   // remember the number for next cycle
+            iter = find(v_cycle.begin(), v_cycle.end(), Node(bnd_node));       // finding node where we going to
         }
         else
         {
-            bnd_vertex = iter->bounds.rbegin()->first;       // the same, in case when we came
-            previous_vertex = iter->number;                  //from vertex with same number
-            iter = find(v_cycle.begin(), v_cycle.end(), Vertex(bnd_vertex));
+            bnd_node = iter->edges.rbegin()->first;       // the same, in case when we came
+            previous_node = iter->number;                  //from node with same number
+            iter = find(v_cycle.begin(), v_cycle.end(), Node(bnd_node));
         }
     }
-    previous_vertex = -1;                  // the simmilar case for going through cycle starting from other direction
+    previous_node = -1;                  // the simmilar case for going through cycle starting from other direction
     iter = iter_in;
     for (uint k = 0; k < v_cycle.size(); ++k)
     {
         cycle_left+=to_string(iter->level)+to_string(iter->colour)+iter->child_range
-                +to_string(iter->bounds.rbegin()->second);
+                +to_string(iter->edges.rbegin()->second);
         if (k == 0)                        // the only change - starting in opposite direction
         {
-            bnd_vertex = iter->bounds.rbegin()->first;
-            previous_vertex = iter->number;
-            iter = find(v_cycle.begin(), v_cycle.end(), Vertex(bnd_vertex));
+            bnd_node = iter->edges.rbegin()->first;
+            previous_node = iter->number;
+            iter = find(v_cycle.begin(), v_cycle.end(), Node(bnd_node));
         }
-        else if (iter->bounds.begin()->first!=previous_vertex)
+        else if (iter->edges.begin()->first!=previous_node)
         {
-            bnd_vertex = iter->bounds.begin()->first;
-            previous_vertex = iter->number;
-            iter = find(v_cycle.begin(), v_cycle.end(), Vertex(bnd_vertex));
+            bnd_node = iter->edges.begin()->first;
+            previous_node = iter->number;
+            iter = find(v_cycle.begin(), v_cycle.end(), Node(bnd_node));
         }
         else
         {
-            bnd_vertex = iter->bounds.rbegin()->first;
-            previous_vertex = iter->number;
-            iter = find(v_cycle.begin(), v_cycle.end(), Vertex(bnd_vertex));
+            bnd_node = iter->edges.rbegin()->first;
+            previous_node = iter->number;
+            iter = find(v_cycle.begin(), v_cycle.end(), Node(bnd_node));
         }
     }
 
