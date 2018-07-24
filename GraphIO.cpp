@@ -13,13 +13,13 @@ using namespace Eigen;
 //#
 //0 1 12
 // 0, 1 - numbers of nodes, 2,3 - their mass factor (colour in my terminology), 12 - weigth of edge between them
-Graph readFile(const string &s)
+Graph readFile(const string &filename)
 {
-    ifstream file(s);
-    string buff, numb;
-    int a = 0;
-    int b = 0;
-    int c = 0;
+    ifstream file(filename);
+    string buff;
+    int node1 = 0;
+    int node2 = 0;
+    int edge = 0;
     Graph g1;
     string ch = "#";
     while(getline(file, buff))
@@ -27,28 +27,28 @@ Graph readFile(const string &s)
         if (buff==ch)
             break;
         stringstream ss(buff);
-        ss >> a >> b;
-        g1.addNode(a, b);
+        ss >> node1 >> node2;
+        g1.addNode(node1, node2);
 
     }
     while(getline(file, buff))
     {
         stringstream ss(buff);
-        ss >> a >> b >> c;
-        g1.setEdge(a, b, c);
+        ss >> node1 >> node2 >> edge;
+        g1.setEdge(node1, node2, edge);
     }
     return g1;
 }
 // for tests - give it matrix of adjacency, it'll write it to file
-void writeMatrixToFile(const Ref<const MatrixXi>& m1)
+void writeMatrix(const Ref<const MatrixXi> &matrix)
 {
     cout << "Write matrix to filename>";
-    string s;
-    cin >> s;
-    ofstream file(s);
-    if (m1 == m1.transpose())
+    string filename;
+    cin >> filename;
+    ofstream file(filename);
+    if (matrix == matrix.transpose())
     {
-        int size = m1.rows();
+        int size = matrix.rows();
         for (int i = 0; i < size; ++i)
         {
             file << i << ' ' << endl;
@@ -58,12 +58,18 @@ void writeMatrixToFile(const Ref<const MatrixXi>& m1)
         {
             for(int j = i; j < size; ++j)
             {
-                if (m1(i, j)!=0)
-                file << i << ' ' << j << ' ' << m1(i, j) << endl;
+                if (matrix(i, j)!=0)
+                file << i << ' ' << j << ' ' << matrix(i, j) << endl;
             }
         }
         file.close();
     }
     else
-        cout << "Wrong matrix! Matrix should be square!" << endl;
+        throw logic_error("MATRIX NOT SIMMYTRIC!");
+}
+void writeCode(const string &filename, const string &code)
+{
+    ofstream file(filename);
+    file << code;
+    file.close();
 }
