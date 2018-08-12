@@ -2,7 +2,7 @@
 Graph Canonization Procedure
 
 ## Description
-This program is writen to canonize graphs with no more than one cycle. You can read more about this process in, for example (IN RUSSIAN) (about canonization of tree)[http://ipo.spb.ru/journal/index.php?article/1037/]. This algorithm mainly based on this article with some features connected with adding a cycle to the graph.
+This program is writen to canonize graphs with no more than one cycle. You can read more about this process in, for example (IN RUSSIAN) [http://ipo.spb.ru/journal/index.php?article/1037/](about canonization of tree). This algorithm mainly based on this article with some features connected with adding a cycle to the graph.
 
 ## How to use
 This programm takes the name of file with graph in trivial graph format (in txt) and prints canonical graph code.
