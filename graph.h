@@ -2,10 +2,6 @@
 #define GRAPH_H
 #include <iostream>
 #include <map>
-#include <eigen3/Eigen/Dense>
-
-using namespace std;
-using namespace Eigen;
 
 //node - structure to keep all data about some node:
 //it's number, level, colour(mass), range of it's children and vector of edges
@@ -16,11 +12,11 @@ struct Node
     int _number = 0;
     int _level = 0;
     int _colour = 0;
-    string _child_range = "";
-    map<int, int> _edges;
+    std::string _child_range = "";
+    std::map<int, int> _edges;
     void addEdge(int node_number, int edge_weigth);
-    operator string() const;
-    friend ostream &operator<<(ostream &os, const Node &b);
+    operator std::string() const;
+    friend std::ostream &operator<<(std::ostream &os, const Node &b);
     friend bool operator==(const Node &vl, const Node &vr);
 };
 
@@ -36,16 +32,15 @@ bool waytosort(Node &v1, Node &v2);
 class Graph
 {
 private:
-    map<int, Node> _nodes;        //graph keeps data in map - for fast acces by key
+    std::map<int, Node> _nodes;        //graph keeps data in map - for fast acces by key
 public:
     Graph(){}
-    Graph(const Ref<const MatrixXi> &matrix);
     Graph(int node_number);
     void setEdge(int node1, int node2, int edge_weigth);
-    operator string() const;
-    friend ostream &operator<<(ostream &os, const Graph &b);
+    operator std::string() const;
+    friend std::ostream &operator<<(std::ostream &os, const Graph &b);
     void addNode(int node_number, int node_colour);
-    string getCanonCode();        // it's our heart of our algorithm
+    std::string getCanonCode();        // it's our heart of our algorithm
 };
 
 #endif // GRAPH_H

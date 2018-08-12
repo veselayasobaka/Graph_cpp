@@ -2,16 +2,26 @@
 #include <vector>
 #include <queue>
 #include "graph.h"
-
+using namespace std;
 string getCode(vector<Node> v);                                     // prototypes
 string getCode(vector<Node> v, vector<Node> nodes_cycle);
 string getCycleCode(vector<Node> &v,vector<Node>::iterator iter);
 
-                                                                    // metods connected with nodes
+/**
+ * \brief metods connected with nodes
+ * \param [in] node_number -
+ * \param [in] edge_weight -
+ * \return Nothing
+ */
 void Node::addEdge(int node_number, int edge_weigth)
 {
     _edges.insert({node_number, edge_weigth});
 }
+
+/**
+ * \brief type casting to std::string
+ * \return string
+ */
 Node::operator string() const
     {
         string node_str = ("") + to_string(_number) + " " + to_string(_level) + " "
@@ -22,6 +32,7 @@ Node::operator string() const
         }
         return node_str;
     }
+
 ostream& operator<<(ostream &os, const Node& str)
 {
     return os << string(str);
@@ -40,38 +51,14 @@ string codeTostring(vector<Node> &v)                             // Generates co
     string canon_code;
     for (auto const &node: v)
     {
-        canon_code+=to_string(node._level)+to_string(node._colour)+node._child_range
-                +to_string(node._edges.begin()->second);
+        canon_code+="("+to_string(node._level)+to_string(node._colour)+node._child_range
+                +to_string(node._edges.begin()->second)+")";
     }
     return canon_code;
 }
 
 //metods connected with Graphs
-//This constructor transforms squared adjacency matrix of graph
-//with no more than one cycle into the adjacency list
-Graph:: Graph(const Ref<const MatrixXi> &m1)
-{
-    if (m1 == m1.transpose() && (m1.rows())*2 >= m1.count())
-    {
-        for (int i = 0; i < m1.rows(); ++i)
-        {
-            Node v(i);
-            for (int j = 0; j < m1.rows(); ++j)
-            {
-                if (m1(i, j) != 0)
-                {
-                    v.addEdge(j, m1(i, j));
-                }
-            }
 
-            _nodes.insert({i,v});
-        }
-    }
-    else
-    {
-        throw logic_error("MATRIX NOT CREATED!");
-    }
-}
 Graph::Graph(int number_nodes)                                  // gives Graph for given number of nodes (without bounds)
 {
     for (int i = 0; i < number_nodes; ++i)
@@ -201,7 +188,7 @@ string getCode(vector<Node> v)      // compute code for non-cycled graph (tree)
             auto iter_find = find(iter, v.end(), Node(n_node));                //the next level of tree
             if(iter_find == v.end())                                           // if we cannot find it break the cycle
                 break;
-            iter_find->_child_range+=to_string(iter->_level)+"_";              // in opposite case write our range
+            iter_find->_child_range+= "_" + to_string(iter->_level)+ "_";      // in opposite case write our range
         }                                                                      //to it's child_range
 
     }
@@ -240,7 +227,7 @@ string getCode(vector<Node> v, vector<Node> nodes_cycle)
             auto iter_find = find(iter, v.end(), Node(n_node));       //the next level of tree
             if(iter_find == v.end())                                  // if we cannot find it break the cycle
                 break;
-            iter_find->_child_range+=to_string(iter->_level)+"_";     // in opposite case write our range
+            iter_find->_child_range+= + "_" + to_string(iter->_level)+"_";     // in opposite case write our range
         }                                                             //to it's child_range
     }
 
@@ -288,14 +275,14 @@ string getCycleCode(vector<Node> &nodes_cycle,vector<Node>::iterator iter_in)
         if (iter->_edges.begin()->first!=previous_node)              // testing number of previous vortex
         {
             bnd_node = iter->_edges.begin()->first;                  // where we going to
-            cycle_right+=to_string(iter->_colour)+iter->_child_range
-                    +to_string(iter->_edges.begin()->second);            // writing all meaning numbers in string
+            cycle_right += "(" + to_string(iter->_colour) + iter->_child_range
+                    + to_string(iter->_edges.begin()->second) + ")";            // writing all meaning numbers in string
         }
         else
         {
             bnd_node = iter->_edges.rbegin()->first;                 // the same, in case when we came
-            cycle_right+=to_string(iter->_colour)+iter->_child_range
-                    +to_string(iter->_edges.rbegin()->second);            // writing all meaning numbers in string
+            cycle_right+="(" + to_string(iter->_colour)+iter->_child_range
+                    +to_string(iter->_edges.rbegin()->second) + ")";            // writing all meaning numbers in string
         }
         previous_node = iter->_number;                               // remember our number for next cycle
         iter = find(nodes_cycle.begin(), nodes_cycle.end(), Node(bnd_node));     // finding node where we going to
@@ -307,20 +294,20 @@ string getCycleCode(vector<Node> &nodes_cycle,vector<Node>::iterator iter_in)
         if (k == 0)                     // the only change - starting in opposite direction
         {
             bnd_node = iter->_edges.rbegin()->first;
-            cycle_left+=to_string(iter->_colour)+iter->_child_range
-                    +to_string(iter->_edges.rbegin()->second);
+            cycle_left+="(" + to_string(iter->_colour)+iter->_child_range
+                    +to_string(iter->_edges.rbegin()->second) + ")";
         }
         else if (iter->_edges.begin()->first!=previous_node)
         {
             bnd_node = iter->_edges.begin()->first;
-            cycle_left+=to_string(iter->_colour)+iter->_child_range
-                    +to_string(iter->_edges.begin()->second);
+            cycle_left+="(" + to_string(iter->_colour)+iter->_child_range
+                    +to_string(iter->_edges.begin()->second) + ")";
         }
         else
         {
             bnd_node = iter->_edges.rbegin()->first;
-            cycle_left+=to_string(iter->_colour)+iter->_child_range
-                    +to_string(iter->_edges.rbegin()->second);
+            cycle_left+="(" + to_string(iter->_colour)+iter->_child_range
+                    +to_string(iter->_edges.rbegin()->second) + ")";
         }
         previous_node = iter->_number;
         iter = find(nodes_cycle.begin(), nodes_cycle.end(), Node(bnd_node));
