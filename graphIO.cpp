@@ -5,13 +5,17 @@
 #include "graph.h"
 using namespace std;
 
-//function to read from file
-// matrix should be in format like this:
-//0 2
-//1 3
-//#
-//0 1 12
-// 0, 1 - numbers of nodes, 2,3 - their mass factor (colour in my terminology), 12 - weigth of edge between them
+/**
+* @brief readFile - function to read from file
+* matrix should be in format like this:
+* 0 2
+* 1 3
+* #
+* 0 1 12
+* 0, 1 - numbers of nodes, 2,3 - their mass factor (colour in my terminology), 12 - weigth of edge between them
+* @param filename - the name of file with graph
+* @return graph to canonize
+*/
 Graph readFile(const string &filename)
 {
     ifstream file(filename);
@@ -65,7 +69,11 @@ Graph readFile(const string &filename)
         exit(EXIT_FAILURE);
     }
 }
-
+/**
+ * @brief writeCode - writes canonical code to file
+ * @param filename - where to write
+ * @param code - string of canonical code
+ */
 void writeCode(const string &filename, const string &code)
 {
     ofstream file(filename);

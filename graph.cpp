@@ -33,33 +33,7 @@ bool operator==(const Node &vl, const Node &vr)
 {
     return vl._number == vr._number;
 }
-/**
- * @brief isEqual - function to test equivalence of _nodes
- * @param v1 - first node
- * @param v2 - second node
- * @return true if all parametres of nodes is equal, false in opposite case
- */
-bool isEqual(const Node &v1, const Node &v2)
-{
-    return (v1._level == v2._level)&&(v1._colour==v2._colour)&&(v1._child_range == v2._child_range)&&
-            (v1._edges.begin()->second == v2._edges.begin()->second);
-}
-/**
- * @brief codeTostring - Generates code of tree. Tree - is a graph, that have no cycle
- * if tree is connonized - it'll be a canonical code
- * @param v vector of canonized nodes 
- * @return string of canonical graph code
- */
-string codeTostring(vector<Node> &v)                            
-{                                                               
-    string canon_code;
-    for (auto const &node: v)
-    {
-        canon_code+="("+to_string(node._level)+to_string(node._colour)+node._child_range
-                +to_string(node._edges.begin()->second)+")";
-    }
-    return canon_code;
-}
+
 
 //metods connected with Graphs
 
@@ -171,8 +145,39 @@ string Graph::getCanonCode()
     }
         return getCode(node_sorted);                        //without
 }
-
-string getCode(vector<Node> v)      // compute code for non-cycled graph (tree)
+/**
+ * @brief isEqual - function to test equivalence of _nodes
+ * @param v1 - first node
+ * @param v2 - second node
+ * @return true if all parametres of nodes is equal, false in opposite case
+ */
+bool isEqual(const Node &v1, const Node &v2)
+{
+    return (v1._level == v2._level)&&(v1._colour==v2._colour)&&(v1._child_range == v2._child_range)&&
+            (v1._edges.begin()->second == v2._edges.begin()->second);
+}
+/**
+ * @brief codeTostring - Generates code of tree. Tree - is a graph, that have no cycle
+ * if tree is connonized - it'll be a canonical code
+ * @param v vector of canonized nodes
+ * @return string of canonical graph code
+ */
+string codeTostring(vector<Node> &v)
+{
+    string canon_code;
+    for (auto const &node: v)
+    {
+        canon_code+="("+to_string(node._level)+to_string(node._colour)+node._child_range
+                +to_string(node._edges.begin()->second)+")";
+    }
+    return canon_code;
+}
+/**
+ * @brief getCode - compute code for non-cycled graph (tree)
+ * @param v - vector of nodes of canonized graph
+ * @return string of canonical graph code
+ */
+string getCode(vector<Node> v)
 {
     int current_level = 0;          // this number will keep current level of node
     const auto max_level = v.rbegin()->_level;     // how many cycles we need to end canoniztion procedure
@@ -200,7 +205,12 @@ string getCode(vector<Node> v)      // compute code for non-cycled graph (tree)
 }
 
 //--------->simillar function but made to work with 1-cycled trees!<------------//
-
+/**
+ * @brief getCode  - compute code for cycled graph (1-tree)
+ * @param v vector of nodes not included to graph
+ * @param nodes_cycle - vector of nodes from cycle
+ * @return string of canonical graph code
+ */
 string getCode(vector<Node> v, vector<Node> nodes_cycle)
 {
 
@@ -266,6 +276,12 @@ string getCode(vector<Node> v, vector<Node> nodes_cycle)
 
 
     //CANONIZATION CYCLE PROCEDURE(from pointed node)! WARNING, HARD TO UNDERSTAND
+/**
+ * @brief getCycleCode - procedure to canonize the cycle of graph and get it's code
+ * @param nodes_cycle - vector of nodes from cycle
+ * @param iter_in - points to node, from witch code starts
+ * @return string of cycle code
+ */
 string getCycleCode(vector<Node> &nodes_cycle,vector<Node>::iterator iter_in)
 {
     string cycle_left = "";              // strings for cononization code of cycle if going left
