@@ -3,25 +3,17 @@
 #include <queue>
 #include "graph.h"
 using namespace std;
-string getCode(vector<Node> v);                                     // prototypes
+
+ // prototypes
+string getCode(vector<Node> v);                                    
 string getCode(vector<Node> v, vector<Node> nodes_cycle);
 string getCycleCode(vector<Node> &v,vector<Node>::iterator iter);
 
-/**
- * \brief metods connected with nodes
- * \param [in] node_number -
- * \param [in] edge_weight -
- * \return Nothing
- */
+
 void Node::addEdge(int node_number, int edge_weigth)
 {
     _edges.insert({node_number, edge_weigth});
 }
-
-/**
- * \brief type casting to std::string
- * \return string
- */
 Node::operator string() const
     {
         string node_str = ("") + to_string(_number) + " " + to_string(_level) + " "
@@ -41,13 +33,25 @@ bool operator==(const Node &vl, const Node &vr)
 {
     return vl._number == vr._number;
 }
-bool isEqual(const Node &v1, const Node &v2)                     // function to test equivalence of _nodes
+/**
+ * @brief isEqual - function to test equivalence of _nodes
+ * @param v1 - first node
+ * @param v2 - second node
+ * @return true if all parametres of nodes is equal, false in opposite case
+ */
+bool isEqual(const Node &v1, const Node &v2)
 {
     return (v1._level == v2._level)&&(v1._colour==v2._colour)&&(v1._child_range == v2._child_range)&&
             (v1._edges.begin()->second == v2._edges.begin()->second);
 }
-string codeTostring(vector<Node> &v)                             // Generates code of tree
-{                                                                //if tree is connonized - it'll be a canonical code
+/**
+ * @brief codeTostring - Generates code of tree. Tree - is a graph, that have no cycle
+ * if tree is connonized - it'll be a canonical code
+ * @param v vector of canonized nodes 
+ * @return string of canonical graph code
+ */
+string codeTostring(vector<Node> &v)                            
+{                                                               
     string canon_code;
     for (auto const &node: v)
     {
@@ -59,7 +63,7 @@ string codeTostring(vector<Node> &v)                             // Generates co
 
 //metods connected with Graphs
 
-Graph::Graph(int number_nodes)                                  // gives Graph for given number of nodes (without bounds)
+Graph::Graph(int number_nodes)                                  
 {
     for (int i = 0; i < number_nodes; ++i)
     {
@@ -68,7 +72,7 @@ Graph::Graph(int number_nodes)                                  // gives Graph f
     }
 }
 
-void Graph::setEdge(int node1, int node2, int edge_weigth)      //set edge between node1 and node2 with edge_weigth
+void Graph::setEdge(int node1, int node2, int edge_weigth)     
 {
     auto it = _nodes.find(node1);
     it->second.addEdge(node2, edge_weigth);
@@ -95,7 +99,7 @@ ostream& operator<<(ostream &os, const Graph& gstr)
 {
     return os << string(gstr);
 }
-bool waytosort(Node &v1, Node &v2)                              // sorts by all meaning parametres
+bool waytosort(Node &v1, Node &v2)                             
 {
     return (v1._level < v2._level) ||
            ((v1._level == v2._level) && (v1._edges.begin()->second < v2._edges.begin()->second)) ||
@@ -105,9 +109,8 @@ bool waytosort(Node &v1, Node &v2)                              // sorts by all 
            (v1._colour == v2._colour) && (v1._child_range < v2._child_range));
 }
 
-// function that takes graph, distributes it _nodes by levels and gives you
-//canonical graph code with a little help of getCode function
-// DON'T TRY TO UNDERSTEND IT, YOU MIND WILL CRUSH
+
+// Hard to undesrtand. Be patient!
 string Graph::getCanonCode()
 {
     queue<int> queue_n_nodes;                   //queue for numbers of lower branches
